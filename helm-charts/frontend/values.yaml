@@ -3,13 +3,12 @@
 
 # Namespace Configuration
 namespace: reddit-app
-
 # Deployment Configuration
 deployment:
   name: reddit-frontend
   app: reddit-frontend
   replicas: 1
-  image: ""  # Will be set by CI/CD pipeline: <account>.dkr.ecr.us-east-1.amazonaws.com/reddit-frontend:tag
+  image: "231498620802.dkr.ecr.us-east-1.amazonaws.com/reddit-frontend:471e1d2" # Will be set by CI/CD pipeline: <account>.dkr.ecr.us-east-1.amazonaws.com/reddit-frontend:tag
   containerPort: 3000
   imagePullPolicy: Always
   resources:
@@ -19,7 +18,6 @@ deployment:
     limits:
       memory: "256Mi"
       cpu: "200m"
-  
   # Probes
   livenessProbe:
     enabled: true
@@ -30,7 +28,6 @@ deployment:
     periodSeconds: 10
     timeoutSeconds: 5
     failureThreshold: 3
-  
   readinessProbe:
     enabled: true
     httpGet:
@@ -40,20 +37,17 @@ deployment:
     periodSeconds: 5
     timeoutSeconds: 3
     failureThreshold: 3
-
 # Service Configuration
 service:
   name: reddit-frontend-service
   type: ClusterIP
   port: 80
   targetPort: 3000
-
 # ConfigMap Configuration
 configmap:
   name: frontend-config
   data:
     NEXT_PUBLIC_API_URL: "http://reddit-backend-service:8000"
-
 # HTTPRoute Configuration
 httproute:
   enabled: true
@@ -61,7 +55,7 @@ httproute:
   parentRefs:
     - name: reddit-gateway
       namespace: default
-  hostnames: []  # Set your hostname here, e.g., ["yourdomain.com"]
+  hostnames: [] # Set your hostname here, e.g., ["yourdomain.com"]
   rules:
     - matches:
         - path:
@@ -70,15 +64,11 @@ httproute:
       backendRefs:
         - name: reddit-frontend-service
           port: 80
-
 # Image Pull Secrets (if using private registry)
 imagePullSecrets: []
-
 # Node Selector
 nodeSelector: {}
-
 # Tolerations
 tolerations: []
-
 # Affinity
 affinity: {}
