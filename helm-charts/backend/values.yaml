@@ -22,7 +22,7 @@ deployment:
   livenessProbe:
     enabled: true
     httpGet:
-      path: /health/
+      path: /health/liveness/
       port: 8000
     initialDelaySeconds: 30
     periodSeconds: 10
@@ -31,7 +31,7 @@ deployment:
   readinessProbe:
     enabled: true
     httpGet:
-      path: /health/
+      path: /health/readiness/
       port: 8000
     initialDelaySeconds: 10
     periodSeconds: 5
