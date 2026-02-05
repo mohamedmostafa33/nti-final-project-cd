@@ -1,0 +1,41 @@
+# Root Application - App of Apps Pattern
+# This application manages all other applications in the argocd/apps directory
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: reddit-clone-apps
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: reddit-clone-apps
+    app.kubernetes.io/part-of: reddit-clone
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/YOUR_USERNAME/nti-final-project-cd.git  # UPDATE THIS
+    targetRevision: main
+    path: argocd/apps
+    directory:
+      recurse: false
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

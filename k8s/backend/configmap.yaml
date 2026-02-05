@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: reddit-app-config
+  namespace: reddit-app-namespace
+data:
+  USE_S3: "true"
+  DJANGO_DEBUG: "False"
+  DJANGO_ALLOWED_HOSTS: "*"
+  DJANGO_CSRF_TRUSTED_ORIGINS: ""
+  DJANGO_SECURE: "true"
+  DJANGO_EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
+  

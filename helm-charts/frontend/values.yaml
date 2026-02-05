@@ -1,0 +1,84 @@
+# Frontend Helm Chart Values
+# Default values for reddit-frontend
+
+# Namespace Configuration
+namespace: reddit-app
+
+# Deployment Configuration
+deployment:
+  name: reddit-frontend
+  app: reddit-frontend
+  replicas: 1
+  image: ""  # Will be set by CI/CD pipeline: <account>.dkr.ecr.us-east-1.amazonaws.com/reddit-frontend:tag
+  containerPort: 3000
+  imagePullPolicy: Always
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+  
+  # Probes
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Service Configuration
+service:
+  name: reddit-frontend-service
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+# ConfigMap Configuration
+configmap:
+  name: frontend-config
+  data:
+    NEXT_PUBLIC_API_URL: "http://reddit-backend-service:8000"
+
+# HTTPRoute Configuration
+httproute:
+  enabled: true
+  name: frontend-httproute
+  parentRefs:
+    - name: reddit-gateway
+      namespace: default
+  hostnames: []  # Set your hostname here, e.g., ["yourdomain.com"]
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: reddit-frontend-service
+          port: 80
+
+# Image Pull Secrets (if using private registry)
+imagePullSecrets: []
+
+# Node Selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}

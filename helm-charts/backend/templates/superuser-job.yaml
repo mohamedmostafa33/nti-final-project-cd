@@ -1,0 +1,44 @@
+{{- if .Values.superuserJob.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.deployment.name }}-create-superuser
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "backend.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: {{ .Values.superuserJob.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deployment.app }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: create-superuser
+          image: {{ .Values.deployment.image }}
+          imagePullPolicy: {{ .Values.deployment.imagePullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              python manage.py createsuperuser --noinput || echo "Superuser already exists or failed"
+          env:
+            - name: DJANGO_SUPERUSER_USERNAME
+              value: {{ .Values.superuserJob.username | quote }}
+            - name: DJANGO_SUPERUSER_EMAIL
+              value: {{ .Values.superuserJob.email | quote }}
+            - name: DJANGO_SUPERUSER_PASSWORD
+              value: {{ .Values.superuserJob.password | quote }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.configmap.name }}
+            - secretRef:
+                name: {{ .Values.secret.name }}
+            - secretRef:
+                name: {{ .Values.dbSecret.name }}
+{{- end }}

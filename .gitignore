@@ -1,0 +1,35 @@
+# Helm
+*.tgz
+charts/*.tgz
+
+# Kubernetes
+*.kubeconfig
+kubeconfig
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Secrets - Never commit these
+secrets/
+*.secret.yaml
+*.secrets.yaml
+
+# Local development
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+tmp/
+temp/

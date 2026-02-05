@@ -1,0 +1,138 @@
+# Backend Helm Chart Values
+# Default values for reddit-backend
+
+# Namespace Configuration
+namespace: reddit-app
+
+# Deployment Configuration
+deployment:
+  name: reddit-backend
+  app: reddit-backend
+  replicas: 1
+  image: ""  # Will be set by CI/CD pipeline: <account>.dkr.ecr.us-east-1.amazonaws.com/backend-app:tag
+  containerPort: 8000
+  imagePullPolicy: Always
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  # Probes
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health/
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /health/
+      port: 8000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Service Configuration
+service:
+  name: reddit-backend-service
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000
+
+# ConfigMap Configuration
+configmap:
+  name: reddit-app-config
+  data:
+    USE_S3: "true"
+    DJANGO_DEBUG: "False"
+    DJANGO_ALLOWED_HOSTS: "*"
+    DJANGO_CSRF_TRUSTED_ORIGINS: ""
+    DJANGO_SECURE: "true"
+    DJANGO_EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
+    DJANGO_HSTS_SECONDS: "31536000"
+
+# Secret Configuration (values should be base64 encoded or set via --set)
+secret:
+  name: reddit-app-secret
+  data:
+    DJANGO_SECRET_KEY: ""  # Set via CI/CD or manually
+    AWS_BUCKET_NAME: ""
+    AWS_S3_REGION_NAME: "us-east-1"
+    AWS_S3_CUSTOM_DOMAIN: ""
+
+# Database Secret Reference (created by external secret or manually)
+dbSecret:
+  name: reddit-db-secret
+  # This secret should contain DATABASE_URL
+
+# HTTPRoute Configuration
+httproute:
+  enabled: true
+  name: backend-httproute
+  parentRefs:
+    - name: reddit-gateway
+      namespace: default
+  hostnames: []  # Set your hostname here, e.g., ["api.yourdomain.com"]
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+      backendRefs:
+        - name: reddit-backend-service
+          port: 8000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /admin
+      backendRefs:
+        - name: reddit-backend-service
+          port: 8000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /static
+      backendRefs:
+        - name: reddit-backend-service
+          port: 8000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /media
+      backendRefs:
+        - name: reddit-backend-service
+          port: 8000
+
+# Migration Job Configuration
+migrateJob:
+  enabled: true
+  backoffLimit: 3
+
+# Superuser Job Configuration
+superuserJob:
+  enabled: true
+  backoffLimit: 3
+  username: "admin"
+  email: "admin@reddit.com"
+  password: "Admin@123"
+
+# Image Pull Secrets (if using private registry)
+imagePullSecrets: []
+
+# Node Selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}

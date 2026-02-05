@@ -1,0 +1,14 @@
+apiVersion: v2
+name: reddit-gateway
+description: A Helm chart for Reddit Clone API Gateway
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+maintainers:
+  - name: DevOps Team
+    email: devops@company.com
+keywords:
+  - gateway
+  - nginx
+  - api-gateway
+  - httproute
