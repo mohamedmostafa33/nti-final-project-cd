@@ -47,7 +47,8 @@ service:
 configmap:
   name: frontend-config
   data:
-    NEXT_PUBLIC_API_URL: "http://reddit-backend-service:8000"
+    # This URL must be accessible from the browser (not internal k8s service)
+    NEXT_PUBLIC_API_URL: "http://ae0c6ded64b2744bf986ac3a562409de-1472928096.us-east-1.elb.amazonaws.com"
 # HTTPRoute Configuration
 httproute:
   enabled: true
