@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reddit-backend
+  labels:
+    app: reddit-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: reddit-backend
+  template:
+    metadata:
+      labels:
+        app: reddit-backend
+    spec:
+      containers:
+        - name: reddit-backend
+          image: mohamedmostafa33/backend:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://user:password@postgres:5432/reddit"
+            - name: PORT
+              value: "8000"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reddit-frontend
+  labels:
+    app: reddit-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: reddit-frontend
+  template:
+    metadata:
+      labels:
+        app: reddit-frontend
+    spec:
+      containers:
+        - name: reddit-frontend
+          image: mohamedmostafa33/reddit-frontend:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: REACT_APP_BACKEND_URL
+              value: "http://reddit-backend-service:8000"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
