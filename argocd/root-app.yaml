@@ -14,7 +14,7 @@ spec:
   project: default
   
   source:
-    repoURL: https://github.com/YOUR_USERNAME/nti-final-project-cd.git  # UPDATE THIS
+    repoURL: https://github.com/mohamedmostafa33/nti-final-project-cd.git  # UPDATE THIS
     targetRevision: main
     path: argocd/apps
     directory:
