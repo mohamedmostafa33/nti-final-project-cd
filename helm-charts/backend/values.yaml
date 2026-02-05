@@ -51,7 +51,7 @@ configmap:
     DJANGO_DEBUG: "False"
     DJANGO_ALLOWED_HOSTS: "*"
     DJANGO_CSRF_TRUSTED_ORIGINS: ""
-    DJANGO_SECURE: "true"
+    DJANGO_SECURE: "false"  # TLS terminates at gateway, internal traffic is HTTP
     DJANGO_EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
     DJANGO_HSTS_SECONDS: "31536000"
 # Secret Configuration (values should be base64 encoded or set via --set)
