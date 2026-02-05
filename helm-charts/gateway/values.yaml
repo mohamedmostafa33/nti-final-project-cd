@@ -30,8 +30,10 @@ gateway:
     #       from: All
 
 # Combined HTTPRoute for both frontend and backend
+# DISABLED: Using separate HTTPRoutes in reddit-app namespace instead
+# Cross-namespace routing requires ReferenceGrant which adds complexity
 httproute:
-  enabled: true
+  enabled: false
   name: reddit-httproute
   hostnames: []  # Set your hostname here, e.g., ["reddit.yourdomain.com"]
   rules:
