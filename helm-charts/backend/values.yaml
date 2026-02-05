@@ -8,7 +8,7 @@ deployment:
   name: reddit-backend
   app: reddit-backend
   replicas: 1
-  image: "231498620802.dkr.ecr.us-east-1.amazonaws.com/backend-app:471e1d2" # Will be set by CI/CD pipeline: <account>.dkr.ecr.us-east-1.amazonaws.com/backend-app:tag
+  image: "231498620802.dkr.ecr.us-east-1.amazonaws.com/backend-app:8679f83" # Will be set by CI/CD pipeline: <account>.dkr.ecr.us-east-1.amazonaws.com/backend-app:tag
   containerPort: 8000
   imagePullPolicy: Always
   resources:
@@ -51,7 +51,7 @@ configmap:
     DJANGO_DEBUG: "False"
     DJANGO_ALLOWED_HOSTS: "*"
     DJANGO_CSRF_TRUSTED_ORIGINS: ""
-    DJANGO_SECURE: "false"  # TLS terminates at gateway, internal traffic is HTTP
+    DJANGO_SECURE: "false" # TLS terminates at gateway, internal traffic is HTTP
     DJANGO_EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
     DJANGO_HSTS_SECONDS: "31536000"
 # Secret Configuration (values should be base64 encoded or set via --set)
