@@ -62,10 +62,15 @@ nti-final-project-cd/
 - Helm 3.x installed
 - ArgoCD installed (or use our installation script)
 
-### 1. Install ArgoCD
+### 1. ArgoCD Installation
 
+**Note:** ArgoCD is now automatically installed via Terraform in the [Infrastructure Repository](https://github.com/mohamedmostafa33/nti-final-project-infra). When you run `terraform apply`, the ArgoCD module will:
+- Create the `argocd` namespace
+- Install ArgoCD using the official Helm chart
+- Configure the ArgoCD server as a LoadBalancer service
+
+Alternatively, you can use the manual installation script (for standalone setups):
 ```bash
-# Using our installation script
 chmod +x argocd/install/install-argocd.sh
 ./argocd/install/install-argocd.sh
 ```

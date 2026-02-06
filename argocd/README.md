@@ -4,26 +4,31 @@ This directory contains ArgoCD Application manifests for automated GitOps deploy
 
 ## Prerequisites
 
-1. ArgoCD installed on your Kubernetes cluster
-2. ArgoCD CLI configured
+1. ArgoCD installed on your Kubernetes cluster (automatically installed via Terraform from the Infrastructure Repository)
+2. ArgoCD CLI configured (optional)
 3. Access to the CD repository
 
 ## Installation
 
-### 1. Install ArgoCD (if not already installed)
+### ArgoCD Installation (Automated via Terraform)
+
+**ArgoCD is now automatically installed** when you run `terraform apply` in the [Infrastructure Repository](https://github.com/mohamedmostafa33/nti-final-project-infra). The Terraform ArgoCD module will:
+- Create the `argocd` namespace
+- Install ArgoCD using the official Helm chart (version 7.7.16)
+- Configure the ArgoCD server as a LoadBalancer service
+- Set up insecure mode for easier access
+
+### Manual Installation (Alternative)
+
+If you need to install ArgoCD manually (for standalone setups or testing):
 
 ```bash
-# Create namespace
-kubectl create namespace argocd
-
-# Install ArgoCD
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-
-# Wait for ArgoCD to be ready
-kubectl wait --for=condition=available --timeout=600s deployment/argocd-server -n argocd
+# Use the installation script
+chmod +x argocd/install/install-argocd.sh
+./argocd/install/install-argocd.sh
 ```
 
-### 2. Deploy the Applications
+### Deploy the Applications
 
 ```bash
 # Apply the root application (App of Apps pattern)
@@ -33,10 +38,14 @@ kubectl apply -f argocd/root-app.yaml
 kubectl apply -f argocd/apps/
 ```
 
-### 3. Access ArgoCD UI
+### Access ArgoCD UI
 
 ```bash
-# Port forward to access the UI
+# If using LoadBalancer (default with Terraform):
+kubectl get svc argocd-server -n argocd
+# Access the EXTERNAL-IP in your browser
+
+# Or port forward to access the UI locally:
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 
 # Get the initial admin password
