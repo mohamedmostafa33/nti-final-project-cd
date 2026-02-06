@@ -1,16 +1,15 @@
 # Frontend Components
 
-مكونات Frontend الخاصة بتطبيق Reddit Clone.
+Frontend components for the Reddit Clone application.
 
-## الملفات
+## Files
 
-- **deployment.yaml**: Deployment configuration للـ Frontend
-- **service.yaml**: Service configuration للوصول للـ Frontend
-- **kustomization.yaml**: Kustomize configuration
+- **deployment.yaml**: Deployment configuration for the Frontend
+- **service.yaml**: Service configuration for accessing the Frontend
 
-## المواصفات
+## Specifications
 
-- **Image**: mohamedmostafa33/reddit-frontend:latest
+- **Image**: ECR repository reddit-frontend
 - **Port**: 3000
 - **Service Port**: 80
 - **Replicas**: 2
@@ -18,22 +17,22 @@
   - Requests: 128Mi RAM, 100m CPU
   - Limits: 256Mi RAM, 200m CPU
 
-## النشر
+## Deployment
 
 ```bash
-# نشر Frontend فقط
+# Deploy Frontend only
 kubectl apply -k .
 
-# أو
+# Or
 kubectl apply -f .
 ```
 
-## التخصيص
+## Customization
 
-يمكنك تعديل متغيرات البيئة في `deployment.yaml`:
+You can modify environment variables in `deployment.yaml`:
 
 ```yaml
 env:
-  - name: REACT_APP_BACKEND_URL
+  - name: NEXT_PUBLIC_API_URL
     value: "http://reddit-backend-service:8000"
 ```

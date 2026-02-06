@@ -1,16 +1,16 @@
 # Backend Components
 
-مكونات Backend الخاصة بتطبيق Reddit Clone.
+Backend components for the Reddit Clone application.
 
-## الملفات
+## Files
 
-- **deployment.yaml**: Deployment configuration للـ Backend
-- **service.yaml**: Service configuration للوصول للـ Backend
-- **kustomization.yaml**: Kustomize configuration
+- **deployment.yaml**: Deployment configuration for the Backend
+- **service.yaml**: Service configuration for accessing the Backend
+- **configmap.yaml**: ConfigMap for environment variables
 
-## المواصفات
+## Specifications
 
-- **Image**: mohamedmostafa33/backend:latest
+- **Image**: ECR repository backend-app
 - **Port**: 8000
 - **Service Port**: 8000
 - **Replicas**: 2
@@ -18,19 +18,19 @@
   - Requests: 256Mi RAM, 200m CPU
   - Limits: 512Mi RAM, 500m CPU
 
-## النشر
+## Deployment
 
 ```bash
-# نشر Backend فقط
+# Deploy Backend only
 kubectl apply -k .
 
-# أو
+# Or
 kubectl apply -f .
 ```
 
-## التخصيص
+## Customization
 
-⚠️ **مهم**: قم بتحديث متغيرات البيئة في `deployment.yaml`:
+⚠️ **Important**: Update environment variables in `deployment.yaml`:
 
 ```yaml
 env:
@@ -40,4 +40,4 @@ env:
     value: "8000"
 ```
 
-📝 **ملاحظة**: للإنتاج، استخدم Kubernetes Secrets لحفظ بيانات قاعدة البيانات بشكل آمن.
+📝 **Note**: For production, use Kubernetes Secrets to securely store database credentials.

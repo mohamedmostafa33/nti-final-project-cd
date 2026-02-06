@@ -1,14 +1,13 @@
 # Gateway Components
 
-مكونات Gateway و Routing الخاصة بتطبيق Reddit Clone.
+Gateway and Routing components for the Reddit Clone application.
 
-## الملفات
+## Files
 
 - **gateway.yaml**: Gateway configuration
-- **httproute.yaml**: HTTPRoute configuration للـ routing
-- **kustomization.yaml**: Kustomize configuration
+- **httproute.yaml**: HTTPRoute configuration for routing
 
-## المواصفات
+## Specifications
 
 ### Gateway
 - **Name**: reddit-gateway
@@ -23,29 +22,29 @@
   - `/api/*` → Backend Service (Port 8000)
   - `/*` → Frontend Service (Port 80)
 
-## المتطلبات
+## Prerequisites
 
-يجب تثبيت Gateway API CRDs أولاً:
+Gateway API CRDs must be installed first:
 
 ```bash
 kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/standard-install.yaml
 ```
 
-## النشر
+## Deployment
 
 ```bash
-# نشر Gateway فقط
+# Deploy Gateway only
 kubectl apply -k .
 
-# أو
+# Or
 kubectl apply -f .
 ```
 
-## التخصيص
+## Customization
 
-### تغيير الـ Hostname
+### Change the Hostname
 
-عدّل `httproute.yaml`:
+Edit `httproute.yaml`:
 
 ```yaml
 spec:
@@ -53,9 +52,9 @@ spec:
     - "your-domain.com"
 ```
 
-### إضافة HTTPS
+### Add HTTPS
 
-عدّل `gateway.yaml`:
+Edit `gateway.yaml`:
 
 ```yaml
 listeners:
@@ -68,9 +67,9 @@ listeners:
         - name: your-tls-secret
 ```
 
-### إضافة Routes جديدة
+### Add New Routes
 
-عدّل `httproute.yaml` وأضف rules جديدة:
+Edit `httproute.yaml` and add new rules:
 
 ```yaml
 rules:
