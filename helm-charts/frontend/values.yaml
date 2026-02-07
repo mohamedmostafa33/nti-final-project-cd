@@ -48,7 +48,7 @@ configmap:
   name: frontend-config
   data:
     # This URL must be accessible from the browser (not internal k8s service)
-    NEXT_PUBLIC_API_URL: "https://www.abdallahfekry.com/api"
+    NEXT_PUBLIC_API_URL: "http://www.abdallahfekry.com/api"
 # HTTPRoute Configuration
 httproute:
   enabled: true

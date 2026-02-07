@@ -3,28 +3,45 @@
 # Uninstall Script — run BEFORE terraform destroy
 # This removes all K8s resources that could block infrastructure teardown
 # (LoadBalancers, PVCs, finalizers, etc.)
+#
+# Handles stuck namespaces/CRDs by force-removing finalizers.
 
 set -uo pipefail
+
+# ── Helper: wait for a namespace to be fully deleted ──
+wait_ns_gone() {
+  local ns="$1" timeout="${2:-120}" elapsed=0
+  if ! kubectl get namespace "$ns" &>/dev/null; then return 0; fi
+  echo "  Waiting for namespace '$ns' to terminate (up to ${timeout}s)..."
+  while kubectl get namespace "$ns" &>/dev/null; do
+    if (( elapsed >= timeout )); then
+      echo "  Namespace '$ns' stuck — force-removing finalizers..."
+      kubectl get namespace "$ns" -o json \
+        | jq '.spec.finalizers = []' \
+        | kubectl replace --raw "/api/v1/namespaces/$ns/finalize" -f - &>/dev/null || true
+      sleep 3
+      return 0
+    fi
+    sleep 3; elapsed=$((elapsed + 3))
+  done
+}
 
 echo "============================================"
 echo "  Step 1: Remove ArgoCD Applications"
 echo "============================================"
 # Remove finalizers first so ArgoCD doesn't block deletion
 for app in $(kubectl get applications -n argocd -o name 2>/dev/null); do
-  echo "Removing finalizers from $app ..."
+  echo "  Removing finalizers from $app ..."
   kubectl patch "$app" -n argocd --type json \
     -p '[{"op":"remove","path":"/metadata/finalizers"}]' 2>/dev/null || true
 done
-
-# Delete all ArgoCD applications
 kubectl delete applications --all -n argocd --timeout=60s 2>/dev/null || true
 echo "ArgoCD applications removed."
 
 echo ""
 echo "============================================"
-echo "  Step 2: Delete app workloads and secrets"
+echo "  Step 2: Delete app workloads & secrets"
 echo "============================================"
-# Delete everything in the app namespace
 kubectl delete all --all -n reddit-app --timeout=60s 2>/dev/null || true
 kubectl delete configmap --all -n reddit-app 2>/dev/null || true
 kubectl delete secret --all -n reddit-app 2>/dev/null || true
@@ -36,17 +53,17 @@ echo ""
 echo "============================================"
 echo "  Step 3: Delete Gateway resources"
 echo "============================================"
-kubectl delete gateway --all -n default --timeout=60s 2>/dev/null || true
-kubectl delete httproute --all -n default --timeout=60s 2>/dev/null || true
+kubectl delete gateway --all --all-namespaces --timeout=60s 2>/dev/null || true
+kubectl delete httproute --all --all-namespaces --timeout=60s 2>/dev/null || true
 echo "Gateway resources removed."
 
 echo ""
 echo "============================================"
 echo "  Step 4: Uninstall NGINX Gateway Fabric"
 echo "============================================"
-# This removes the LoadBalancer service — critical before terraform destroy
 helm uninstall nginx-gateway -n nginx-gateway 2>/dev/null || true
-kubectl delete namespace nginx-gateway --timeout=120s 2>/dev/null || true
+kubectl delete namespace nginx-gateway --timeout=60s 2>/dev/null || true
+wait_ns_gone nginx-gateway 90
 echo "NGINX Gateway Fabric removed."
 
 echo ""
@@ -54,7 +71,22 @@ echo "============================================"
 echo "  Step 5: Uninstall ArgoCD"
 echo "============================================"
 kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml 2>/dev/null || true
-kubectl delete namespace argocd --timeout=120s 2>/dev/null || true
+kubectl delete namespace argocd --timeout=60s 2>/dev/null || true
+wait_ns_gone argocd 90
+
+# Force-clean stuck ArgoCD CRDs (prevents "CRD is terminating" on reinstall)
+for crd in applications.argoproj.io applicationsets.argoproj.io appprojects.argoproj.io; do
+  if kubectl get crd "$crd" &>/dev/null; then
+    kubectl patch crd "$crd" --type=merge -p '{"metadata":{"finalizers":[]}}' 2>/dev/null || true
+    kubectl delete crd "$crd" --timeout=30s 2>/dev/null || true
+  fi
+done
+
+# Clean up cluster-scoped leftovers
+for res in argocd-application-controller argocd-applicationset-controller argocd-server; do
+  kubectl delete clusterrole "$res" --ignore-not-found 2>/dev/null || true
+  kubectl delete clusterrolebinding "$res" --ignore-not-found 2>/dev/null || true
+done
 echo "ArgoCD removed."
 
 echo ""
@@ -68,22 +100,28 @@ echo ""
 echo "============================================"
 echo "  Step 7: Delete app namespace"
 echo "============================================"
-kubectl delete namespace reddit-app --timeout=120s 2>/dev/null || true
+kubectl delete namespace reddit-app --timeout=60s 2>/dev/null || true
+wait_ns_gone reddit-app 90
 echo "Namespace reddit-app removed."
 
 echo ""
 echo "============================================"
-echo "  Step 8: Verify no LoadBalancers remain"
+echo "  Step 8: Verify clean state"
 echo "============================================"
 LB_SERVICES=$(kubectl get svc --all-namespaces -o json 2>/dev/null | grep -c '"LoadBalancer"' || true)
 if [ "$LB_SERVICES" -gt 0 ]; then
   echo "WARNING: $LB_SERVICES LoadBalancer service(s) still exist!"
-  echo "These may block terraform destroy. Listing:"
   kubectl get svc --all-namespaces | grep LoadBalancer
-  echo ""
-  echo "Delete them manually before running terraform destroy."
 else
-  echo "No LoadBalancer services found. Safe to run terraform destroy."
+  echo "No LoadBalancer services found."
+fi
+
+REMAINING=$(kubectl get namespaces -o name 2>/dev/null | grep -cE 'argocd|nginx-gateway|reddit-app' || true)
+if [ "$REMAINING" -gt 0 ]; then
+  echo "WARNING: Some namespaces still exist:"
+  kubectl get namespaces | grep -E 'argocd|nginx-gateway|reddit-app'
+else
+  echo "All application namespaces cleaned."
 fi
 
 echo ""
