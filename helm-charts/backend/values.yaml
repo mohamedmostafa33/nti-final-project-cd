@@ -50,8 +50,8 @@ configmap:
     USE_S3: "true"
     DJANGO_DEBUG: "False"
     DJANGO_ALLOWED_HOSTS: "*"
-    DJANGO_CORS_ALLOWED_ORIGINS: "https://www.abdallahfekry.com"
-    DJANGO_CSRF_TRUSTED_ORIGINS: "https://www.abdallahfekry.com"
+    DJANGO_CORS_ALLOWED_ORIGINS: "https://www.abdallahfekry.com,https://abdallahfekry.com"
+    DJANGO_CSRF_TRUSTED_ORIGINS: "https://www.abdallahfekry.com,https://abdallahfekry.com"
     DJANGO_SECURE: "false" # TLS terminates at gateway, internal traffic is HTTP
     DJANGO_EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
     DJANGO_HSTS_SECONDS: "31536000"
@@ -75,6 +75,7 @@ httproute:
       namespace: default
   hostnames:
     - "www.abdallahfekry.com"
+    - "abdallahfekry.com"
   rules:
     - matches:
         - path:

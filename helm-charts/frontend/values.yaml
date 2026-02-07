@@ -47,8 +47,8 @@ service:
 configmap:
   name: frontend-config
   data:
-    # Relative URL - works with any domain since frontend & backend share the same gateway
-    NEXT_PUBLIC_API_URL: "/api"
+    # This URL must be accessible from the browser (not internal k8s service)
+    NEXT_PUBLIC_API_URL: "https://www.abdallahfekry.com/api"
 # HTTPRoute Configuration
 httproute:
   enabled: true
@@ -58,6 +58,7 @@ httproute:
       namespace: default
   hostnames:
     - "www.abdallahfekry.com"
+    - "abdallahfekry.com"
   rules:
     - matches:
         - path:
