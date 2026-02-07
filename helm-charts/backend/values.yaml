@@ -58,8 +58,10 @@ configmap:
     AWS_BUCKET_NAME: "reddit-clone-bucket-nti"
     AWS_S3_REGION_NAME: "us-east-1"
     AWS_S3_CUSTOM_DOMAIN: "reddit-clone-bucket-nti.s3.amazonaws.com"
-# Secret Configuration (values should be base64 encoded or set via --set)
+# Secret Configuration
+# Set create=false when injecting via: kubectl create secret generic reddit-app-secret -n reddit-app
 secret:
+  create: false
   name: reddit-app-secret
   data:
     DJANGO_SECRET_KEY: "" # Set via CI/CD or manually
