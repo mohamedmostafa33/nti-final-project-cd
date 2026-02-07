@@ -31,6 +31,4 @@ spec:
                 name: {{ .Values.configmap.name }}
             - secretRef:
                 name: {{ .Values.secret.name }}
-            - secretRef:
-                name: {{ .Values.dbSecret.name }}
 {{- end }}

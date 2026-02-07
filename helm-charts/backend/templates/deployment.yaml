@@ -35,8 +35,6 @@ spec:
                 name: {{ .Values.configmap.name }}
             - secretRef:
                 name: {{ .Values.secret.name }}
-            - secretRef:
-                name: {{ .Values.dbSecret.name }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           {{- if .Values.deployment.livenessProbe.enabled }}

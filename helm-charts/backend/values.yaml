@@ -54,18 +54,17 @@ configmap:
     DJANGO_SECURE: "false" # TLS terminates at gateway, internal traffic is HTTP
     DJANGO_EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
     DJANGO_HSTS_SECONDS: "31536000"
+    AWS_BUCKET_NAME: "reddit-clone-bucket-nti"
+    AWS_S3_REGION_NAME: "us-east-1"
+    AWS_S3_CUSTOM_DOMAIN: "reddit-clone-bucket-nti.s3.amazonaws.com"
 # Secret Configuration (values should be base64 encoded or set via --set)
 secret:
   name: reddit-app-secret
   data:
     DJANGO_SECRET_KEY: "" # Set via CI/CD or manually
-    AWS_BUCKET_NAME: ""
-    AWS_S3_REGION_NAME: "us-east-1"
-    AWS_S3_CUSTOM_DOMAIN: ""
-# Database Secret Reference (created by external secret or manually)
-dbSecret:
-  name: reddit-db-secret
-  # This secret should contain DATABASE_URL
+    AWS_ACCESS_KEY_ID: "" # Set via CI/CD or manually
+    AWS_SECRET_ACCESS_KEY: "" # Set via CI/CD or manually
+    DATABASE_URL: "" # Set via CI/CD or manually
 # HTTPRoute Configuration
 httproute:
   enabled: true
