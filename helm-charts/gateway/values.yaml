@@ -10,11 +10,11 @@ tls:
   issuerName: letsencrypt-prod
   issuerKind: ClusterIssuer
   # Certificates to create
+  # NOTE: abdallahfekry.com (apex) requires DNS fix in GoDaddy - currently only www works
   certificates:
     - name: reddit-tls-cert
       secretName: reddit-tls-cert
       dnsNames:
-        - abdallahfekry.com
         - www.abdallahfekry.com
 
 # Gateway Configuration
@@ -32,18 +32,6 @@ gateway:
     - name: https
       protocol: HTTPS
       port: 443
-      hostname: abdallahfekry.com
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: reddit-tls-cert
-            kind: Secret
-      allowedRoutes:
-        namespaces:
-          from: All
-    - name: https-www
-      protocol: HTTPS
-      port: 443
       hostname: www.abdallahfekry.com
       tls:
         mode: Terminate
@@ -59,7 +47,6 @@ redirectRoute:
   enabled: true
   name: http-to-https-redirect
   hostnames:
-    - abdallahfekry.com
     - www.abdallahfekry.com
 
 # Combined HTTPRoute for both frontend and backend

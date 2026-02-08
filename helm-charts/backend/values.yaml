@@ -76,12 +76,8 @@ httproute:
     - name: reddit-gateway
       namespace: default
       sectionName: https
-    - name: reddit-gateway
-      namespace: default
-      sectionName: https-www
   hostnames:
     - "www.abdallahfekry.com"
-    - "abdallahfekry.com"
   rules:
     - matches:
         - path:
