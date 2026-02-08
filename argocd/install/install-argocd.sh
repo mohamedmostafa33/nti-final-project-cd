@@ -80,13 +80,15 @@ if helm status cert-manager -n cert-manager &>/dev/null; then
   helm upgrade cert-manager jetstack/cert-manager \
     --namespace cert-manager \
     --version v1.17.1 \
-    --set crds.enabled=true
+    --set crds.enabled=true \
+    --set config.enableGatewayAPI=true
 else
   helm install cert-manager jetstack/cert-manager \
     --namespace cert-manager \
     --create-namespace \
     --version v1.17.1 \
-    --set crds.enabled=true
+    --set crds.enabled=true \
+    --set config.enableGatewayAPI=true
 fi
 
 echo "Waiting for cert-manager to be ready..."
