@@ -68,7 +68,24 @@ echo "NGINX Gateway Fabric removed."
 
 echo ""
 echo "============================================"
-echo "  Step 5: Uninstall ArgoCD"
+echo "  Step 5: Uninstall cert-manager"
+echo "============================================"
+kubectl delete clusterissuer letsencrypt-prod 2>/dev/null || true
+helm uninstall cert-manager -n cert-manager 2>/dev/null || true
+kubectl delete namespace cert-manager --timeout=60s 2>/dev/null || true
+wait_ns_gone cert-manager 90
+
+# Clean up cert-manager CRDs
+for crd in certificates.cert-manager.io certificaterequests.cert-manager.io clusterissuers.cert-manager.io issuers.cert-manager.io challenges.acme.cert-manager.io orders.acme.cert-manager.io; do
+  if kubectl get crd "$crd" &>/dev/null; then
+    kubectl delete crd "$crd" --timeout=30s 2>/dev/null || true
+  fi
+done
+echo "cert-manager removed."
+
+echo ""
+echo "============================================"
+echo "  Step 6: Uninstall ArgoCD"
 echo "============================================"
 kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml 2>/dev/null || true
 kubectl delete namespace argocd --timeout=60s 2>/dev/null || true
@@ -91,14 +108,14 @@ echo "ArgoCD removed."
 
 echo ""
 echo "============================================"
-echo "  Step 6: Remove Gateway API CRDs"
+echo "  Step 7: Remove Gateway API CRDs"
 echo "============================================"
 kubectl delete -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml 2>/dev/null || true
 echo "Gateway API CRDs removed."
 
 echo ""
 echo "============================================"
-echo "  Step 7: Delete app namespace"
+echo "  Step 8: Delete app namespace"
 echo "============================================"
 kubectl delete namespace reddit-app --timeout=60s 2>/dev/null || true
 wait_ns_gone reddit-app 90
@@ -106,7 +123,7 @@ echo "Namespace reddit-app removed."
 
 echo ""
 echo "============================================"
-echo "  Step 8: Verify clean state"
+echo "  Step 9: Verify clean state"
 echo "============================================"
 LB_SERVICES=$(kubectl get svc --all-namespaces -o json 2>/dev/null | grep -c '"LoadBalancer"' || true)
 if [ "$LB_SERVICES" -gt 0 ]; then
@@ -116,10 +133,10 @@ else
   echo "No LoadBalancer services found."
 fi
 
-REMAINING=$(kubectl get namespaces -o name 2>/dev/null | grep -cE 'argocd|nginx-gateway|reddit-app' || true)
+REMAINING=$(kubectl get namespaces -o name 2>/dev/null | grep -cE 'argocd|nginx-gateway|reddit-app|cert-manager' || true)
 if [ "$REMAINING" -gt 0 ]; then
   echo "WARNING: Some namespaces still exist:"
-  kubectl get namespaces | grep -E 'argocd|nginx-gateway|reddit-app'
+  kubectl get namespaces | grep -E 'argocd|nginx-gateway|reddit-app|cert-manager'
 else
   echo "All application namespaces cleaned."
 fi

@@ -1,0 +1,21 @@
+{{- if .Values.tls.enabled }}
+{{- range .Values.tls.certificates }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  labels:
+    {{- include "gateway.labels" $ | nindent 4 }}
+spec:
+  secretName: {{ .secretName }}
+  issuerRef:
+    name: {{ $.Values.tls.issuerName }}
+    kind: {{ $.Values.tls.issuerKind }}
+  dnsNames:
+    {{- range .dnsNames }}
+    - {{ . | quote }}
+    {{- end }}
+{{- end }}
+{{- end }}

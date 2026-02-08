@@ -4,6 +4,19 @@
 # Namespace Configuration
 namespace: default
 
+# TLS Configuration
+tls:
+  enabled: true
+  issuerName: letsencrypt-prod
+  issuerKind: ClusterIssuer
+  # Certificates to create
+  certificates:
+    - name: reddit-tls-cert
+      secretName: reddit-tls-cert
+      dnsNames:
+        - abdallahfekry.com
+        - www.abdallahfekry.com
+
 # Gateway Configuration
 gateway:
   enabled: true
@@ -16,18 +29,38 @@ gateway:
       allowedRoutes:
         namespaces:
           from: All
-    # Uncomment below for HTTPS support
-    # - name: https
-    #   protocol: HTTPS
-    #   port: 443
-    #   tls:
-    #     mode: Terminate
-    #     certificateRefs:
-    #       - name: reddit-tls-secret
-    #         kind: Secret
-    #   allowedRoutes:
-    #     namespaces:
-    #       from: All
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: abdallahfekry.com
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: reddit-tls-cert
+            kind: Secret
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-www
+      protocol: HTTPS
+      port: 443
+      hostname: www.abdallahfekry.com
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: reddit-tls-cert
+            kind: Secret
+      allowedRoutes:
+        namespaces:
+          from: All
+
+# HTTP to HTTPS Redirect Route
+redirectRoute:
+  enabled: true
+  name: http-to-https-redirect
+  hostnames:
+    - abdallahfekry.com
+    - www.abdallahfekry.com
 
 # Combined HTTPRoute for both frontend and backend
 # DISABLED: Using separate HTTPRoutes in reddit-app namespace instead

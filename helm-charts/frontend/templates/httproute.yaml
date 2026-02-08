@@ -13,6 +13,9 @@ spec:
       {{- if .namespace }}
       namespace: {{ .namespace }}
       {{- end }}
+      {{- if .sectionName }}
+      sectionName: {{ .sectionName }}
+      {{- end }}
     {{- end }}
   {{- if .Values.httproute.hostnames }}
   hostnames:

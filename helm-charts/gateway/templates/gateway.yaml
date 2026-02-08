@@ -13,6 +13,9 @@ spec:
     - name: {{ .name }}
       protocol: {{ .protocol }}
       port: {{ .port }}
+      {{- if .hostname }}
+      hostname: {{ .hostname | quote }}
+      {{- end }}
       {{- if .tls }}
       tls:
         mode: {{ .tls.mode }}

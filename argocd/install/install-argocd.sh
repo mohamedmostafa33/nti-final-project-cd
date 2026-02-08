@@ -70,7 +70,55 @@ echo "NGINX Gateway Fabric ready."
 
 echo ""
 echo "============================================"
-echo "  Step 3: Create App Namespace & Secret"
+echo "  Step 3: Install cert-manager"
+echo "============================================"
+helm repo add jetstack https://charts.jetstack.io 2>/dev/null || true
+helm repo update jetstack
+
+if helm status cert-manager -n cert-manager &>/dev/null; then
+  echo "cert-manager already installed, upgrading..."
+  helm upgrade cert-manager jetstack/cert-manager \
+    --namespace cert-manager \
+    --version v1.17.1 \
+    --set crds.enabled=true
+else
+  helm install cert-manager jetstack/cert-manager \
+    --namespace cert-manager \
+    --create-namespace \
+    --version v1.17.1 \
+    --set crds.enabled=true
+fi
+
+echo "Waiting for cert-manager to be ready..."
+kubectl wait --for=condition=Available deployment/cert-manager -n cert-manager --timeout=180s
+kubectl wait --for=condition=Available deployment/cert-manager-webhook -n cert-manager --timeout=180s
+kubectl wait --for=condition=Available deployment/cert-manager-cainjector -n cert-manager --timeout=180s
+
+# Create ClusterIssuer for Let's Encrypt (using Gateway API HTTP-01 solver)
+cat <<EOF | kubectl apply -f -
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@abdallahfekry.com
+    privateKeySecretRef:
+      name: letsencrypt-prod-key
+    solvers:
+      - http01:
+          gatewayHTTPRoute:
+            parentRefs:
+              - name: reddit-gateway
+                namespace: default
+                kind: Gateway
+EOF
+echo "cert-manager and Let's Encrypt ClusterIssuer installed."
+
+echo ""
+echo "============================================"
+echo "  Step 4: Create App Namespace & Secret"
 echo "============================================"
 kubectl create namespace reddit-app --dry-run=client -o yaml | kubectl apply -f -
 
@@ -89,7 +137,7 @@ echo "Secret injected into reddit-app namespace."
 
 echo ""
 echo "============================================"
-echo "  Step 4: Install ArgoCD"
+echo "  Step 5: Install ArgoCD"
 echo "============================================"
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
 
@@ -106,10 +154,21 @@ kubectl apply -f "$SCRIPT_DIR/argocd-config.yaml"
 
 echo ""
 echo "============================================"
-echo "  Step 5: Deploy Applications (App of Apps)"
+echo "  Step 6: Deploy Applications (App of Apps)"
 echo "============================================"
 kubectl apply -f "$CD_ROOT/argocd/root-app.yaml"
 echo "Root application applied. ArgoCD will now sync all apps."
+
+echo ""
+echo "============================================"
+echo "  Step 7: Wait for Certificates"
+echo "============================================"
+echo "Waiting for TLS certificates to be issued (this may take 2-3 minutes)..."
+echo "Certificates will be created by cert-manager when Gateway is deployed."
+echo ""
+echo "You can check certificate status with:"
+echo "   kubectl get certificates -n default"
+echo "   kubectl get certificaterequests -n default"
 
 echo ""
 echo "============================================"
@@ -127,4 +186,10 @@ echo "   Then open: https://localhost:8080"
 echo ""
 echo "Check Gateway LoadBalancer (for DNS setup):"
 echo "   kubectl get svc -n nginx-gateway"
+echo ""
+echo "Check TLS Certificates:"
+echo "   kubectl get certificates -n default"
+echo ""
+echo "Once certificates are Ready, access your site at:"
+echo "   https://www.abdallahfekry.com"
 echo ""
