@@ -53,6 +53,10 @@ echo ""
 echo "============================================"
 echo "  Step 3: Delete Gateway resources"
 echo "============================================"
+# Delete TLS certificates and secrets first
+kubectl delete certificate --all -n default --timeout=60s 2>/dev/null || true
+kubectl delete secret reddit-tls-cert -n default 2>/dev/null || true
+# Delete Gateway resources
 kubectl delete gateway --all --all-namespaces --timeout=60s 2>/dev/null || true
 kubectl delete httproute --all --all-namespaces --timeout=60s 2>/dev/null || true
 echo "Gateway resources removed."
@@ -70,7 +74,17 @@ echo ""
 echo "============================================"
 echo "  Step 5: Uninstall cert-manager"
 echo "============================================"
-kubectl delete clusterissuer letsencrypt-prod 2>/dev/null || true
+# Delete all cert-manager resources first
+kubectl delete certificate --all --all-namespaces 2>/dev/null || true
+kubectl delete certificaterequest --all --all-namespaces 2>/dev/null || true
+kubectl delete order --all --all-namespaces 2>/dev/null || true
+kubectl delete challenge --all --all-namespaces 2>/dev/null || true
+kubectl delete clusterissuer --all 2>/dev/null || true
+kubectl delete issuer --all --all-namespaces 2>/dev/null || true
+
+# Delete Let's Encrypt private key secret
+kubectl delete secret letsencrypt-prod-key -n cert-manager 2>/dev/null || true
+
 helm uninstall cert-manager -n cert-manager 2>/dev/null || true
 kubectl delete namespace cert-manager --timeout=60s 2>/dev/null || true
 wait_ns_gone cert-manager 90

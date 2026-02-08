@@ -163,14 +163,63 @@ echo "Root application applied. ArgoCD will now sync all apps."
 
 echo ""
 echo "============================================"
-echo "  Step 7: Wait for Certificates"
+echo "  Step 7: Wait for Gateway to be Ready"
+echo "============================================"
+echo "Waiting for ArgoCD to deploy the Gateway..."
+
+# Wait for Gateway to be created (up to 5 minutes)
+TIMEOUT=300
+ELAPSED=0
+while ! kubectl get gateway reddit-gateway -n default &>/dev/null; do
+  if (( ELAPSED >= TIMEOUT )); then
+    echo "WARNING: Gateway not created within ${TIMEOUT}s. Continuing anyway..."
+    break
+  fi
+  echo "  Waiting for Gateway... (${ELAPSED}s)"
+  sleep 10
+  ELAPSED=$((ELAPSED + 10))
+done
+
+if kubectl get gateway reddit-gateway -n default &>/dev/null; then
+  echo "Gateway reddit-gateway found."
+  
+  # Wait for Gateway to be programmed
+  echo "Waiting for Gateway to be programmed..."
+  kubectl wait --for=condition=Programmed gateway/reddit-gateway -n default --timeout=180s 2>/dev/null || true
+fi
+
+echo ""
+echo "============================================"
+echo "  Step 8: Wait for TLS Certificates"
 echo "============================================"
 echo "Waiting for TLS certificates to be issued (this may take 2-3 minutes)..."
-echo "Certificates will be created by cert-manager when Gateway is deployed."
-echo ""
-echo "You can check certificate status with:"
-echo "   kubectl get certificates -n default"
-echo "   kubectl get certificaterequests -n default"
+
+# Wait for Certificate to be ready (up to 5 minutes)
+TIMEOUT=300
+ELAPSED=0
+CERT_READY=false
+while ! $CERT_READY; do
+  if (( ELAPSED >= TIMEOUT )); then
+    echo "WARNING: Certificate not ready within ${TIMEOUT}s."
+    echo "Check certificate status with: kubectl describe certificate reddit-tls-cert -n default"
+    break
+  fi
+  
+  if kubectl get certificate reddit-tls-cert -n default &>/dev/null; then
+    STATUS=$(kubectl get certificate reddit-tls-cert -n default -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "Unknown")
+    if [[ "$STATUS" == "True" ]]; then
+      echo "Certificate reddit-tls-cert is Ready!"
+      CERT_READY=true
+      break
+    fi
+    echo "  Certificate status: $STATUS (${ELAPSED}s)"
+  else
+    echo "  Waiting for Certificate to be created... (${ELAPSED}s)"
+  fi
+  
+  sleep 15
+  ELAPSED=$((ELAPSED + 15))
+done
 
 echo ""
 echo "============================================"
