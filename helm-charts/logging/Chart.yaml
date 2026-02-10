@@ -1,0 +1,17 @@
+apiVersion: v2
+name: logging
+description: ELK Stack (Elasticsearch, Kibana, Filebeat) for Reddit Clone logging
+type: application
+version: 1.0.0
+appVersion: "8.5.1"
+
+dependencies:
+  - name: elasticsearch
+    version: "8.5.1"
+    repository: "https://helm.elastic.co"
+  - name: kibana
+    version: "8.5.1"
+    repository: "https://helm.elastic.co"
+  - name: filebeat
+    version: "8.5.1"
+    repository: "https://helm.elastic.co"
