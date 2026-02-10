@@ -1,43 +1,15 @@
-# Backend Components
+# Backend - Raw Manifests (Legacy)
 
-Backend components for the Reddit Clone application.
+Raw Kubernetes manifests for the backend service. These are kept as reference; production deployments use the Helm chart at `helm-charts/backend/`.
 
 ## Files
 
-- **deployment.yaml**: Deployment configuration for the Backend
-- **service.yaml**: Service configuration for accessing the Backend
-- **configmap.yaml**: ConfigMap for environment variables
+| File | Description |
+|------|-------------|
+| deployment.yaml | Backend Deployment (2 replicas, port 8000) |
+| service.yaml | ClusterIP Service |
+| configmap.yaml | Environment variables |
 
-## Specifications
+## Note
 
-- **Image**: ECR repository backend-app
-- **Port**: 8000
-- **Service Port**: 8000
-- **Replicas**: 2
-- **Resources**:
-  - Requests: 256Mi RAM, 200m CPU
-  - Limits: 512Mi RAM, 500m CPU
-
-## Deployment
-
-```bash
-# Deploy Backend only
-kubectl apply -k .
-
-# Or
-kubectl apply -f .
-```
-
-## Customization
-
-⚠️ **Important**: Update environment variables in `deployment.yaml`:
-
-```yaml
-env:
-  - name: DATABASE_URL
-    value: "postgresql://user:password@postgres:5432/reddit"
-  - name: PORT
-    value: "8000"
-```
-
-📝 **Note**: For production, use Kubernetes Secrets to securely store database credentials.
+For production use, deploy via ArgoCD using the Helm chart. See the repository root README for details.

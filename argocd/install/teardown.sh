@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Uninstall Script — run BEFORE terraform destroy
-# This removes all K8s resources that could block infrastructure teardown
+# Platform Teardown Script -- run BEFORE terraform destroy
+# Removes all K8s resources that could block infrastructure teardown
 # (LoadBalancers, PVCs, finalizers, etc.)
 #
 # Handles stuck namespaces/CRDs by force-removing finalizers.
@@ -51,7 +51,34 @@ echo "App workloads removed."
 
 echo ""
 echo "============================================"
-echo "  Step 3: Delete Gateway resources"
+echo "  Step 3: Delete Monitoring Stack"
+echo "============================================"
+kubectl delete pvc --all -n monitoring --timeout=60s 2>/dev/null || true
+kubectl delete all --all -n monitoring --timeout=60s 2>/dev/null || true
+kubectl delete configmap --all -n monitoring 2>/dev/null || true
+kubectl delete secret --all -n monitoring 2>/dev/null || true
+kubectl delete servicemonitor --all -n monitoring 2>/dev/null || true
+kubectl delete prometheusrule --all -n monitoring 2>/dev/null || true
+kubectl delete namespace monitoring --timeout=60s 2>/dev/null || true
+wait_ns_gone monitoring 90
+echo "Monitoring stack removed."
+
+echo ""
+echo "============================================"
+echo "  Step 4: Delete ELK Stack"
+echo "============================================"
+kubectl delete pvc --all -n elk --timeout=60s 2>/dev/null || true
+kubectl delete all --all -n elk --timeout=60s 2>/dev/null || true
+kubectl delete configmap --all -n elk 2>/dev/null || true
+kubectl delete secret --all -n elk 2>/dev/null || true
+kubectl delete jobs --all -n elk --force --grace-period=0 2>/dev/null || true
+kubectl delete namespace elk --timeout=60s 2>/dev/null || true
+wait_ns_gone elk 90
+echo "ELK stack removed."
+
+echo ""
+echo "============================================"
+echo "  Step 5: Delete Gateway resources"
 echo "============================================"
 # Delete TLS certificates and secrets first
 kubectl delete certificate --all -n default --timeout=60s 2>/dev/null || true
@@ -63,7 +90,7 @@ echo "Gateway resources removed."
 
 echo ""
 echo "============================================"
-echo "  Step 4: Uninstall NGINX Gateway Fabric"
+echo "  Step 6: Uninstall NGINX Gateway Fabric"
 echo "============================================"
 helm uninstall nginx-gateway -n nginx-gateway 2>/dev/null || true
 kubectl delete namespace nginx-gateway --timeout=60s 2>/dev/null || true
@@ -72,7 +99,7 @@ echo "NGINX Gateway Fabric removed."
 
 echo ""
 echo "============================================"
-echo "  Step 5: Uninstall cert-manager"
+echo "  Step 7: Uninstall cert-manager"
 echo "============================================"
 # Delete all cert-manager resources first
 kubectl delete certificate --all --all-namespaces 2>/dev/null || true
@@ -99,7 +126,7 @@ echo "cert-manager removed."
 
 echo ""
 echo "============================================"
-echo "  Step 6: Uninstall ArgoCD"
+echo "  Step 8: Uninstall ArgoCD"
 echo "============================================"
 kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml 2>/dev/null || true
 kubectl delete namespace argocd --timeout=60s 2>/dev/null || true
@@ -122,14 +149,14 @@ echo "ArgoCD removed."
 
 echo ""
 echo "============================================"
-echo "  Step 7: Remove Gateway API CRDs"
+echo "  Step 9: Remove Gateway API CRDs"
 echo "============================================"
 kubectl delete -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml 2>/dev/null || true
 echo "Gateway API CRDs removed."
 
 echo ""
 echo "============================================"
-echo "  Step 8: Delete app namespace"
+echo "  Step 10: Delete app namespace"
 echo "============================================"
 kubectl delete namespace reddit-app --timeout=60s 2>/dev/null || true
 wait_ns_gone reddit-app 90
@@ -137,7 +164,7 @@ echo "Namespace reddit-app removed."
 
 echo ""
 echo "============================================"
-echo "  Step 9: Verify clean state"
+echo "  Step 11: Verify clean state"
 echo "============================================"
 LB_SERVICES=$(kubectl get svc --all-namespaces -o json 2>/dev/null | grep -c '"LoadBalancer"' || true)
 if [ "$LB_SERVICES" -gt 0 ]; then
@@ -147,10 +174,10 @@ else
   echo "No LoadBalancer services found."
 fi
 
-REMAINING=$(kubectl get namespaces -o name 2>/dev/null | grep -cE 'argocd|nginx-gateway|reddit-app|cert-manager' || true)
+REMAINING=$(kubectl get namespaces -o name 2>/dev/null | grep -cE 'argocd|nginx-gateway|reddit-app|cert-manager|monitoring|elk' || true)
 if [ "$REMAINING" -gt 0 ]; then
   echo "WARNING: Some namespaces still exist:"
-  kubectl get namespaces | grep -E 'argocd|nginx-gateway|reddit-app|cert-manager'
+  kubectl get namespaces | grep -E 'argocd|nginx-gateway|reddit-app|cert-manager|monitoring|elk'
 else
   echo "All application namespaces cleaned."
 fi

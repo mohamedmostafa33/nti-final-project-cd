@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# ArgoCD Installation Script
-# Installs prerequisites, injects secrets, installs ArgoCD, and deploys all applications.
+# Platform Bootstrap Script
+# Sets up the full Reddit Clone platform on a bare EKS cluster.
+# Installs Gateway API, NGINX Gateway Fabric, cert-manager, ArgoCD,
+# injects application secrets, and deploys all apps via App-of-Apps.
+# ArgoCD then auto-deploys monitoring (Prometheus/Grafana) and logging (ELK).
 #
 # Prerequisites:
 #   - kubectl configured with EKS cluster access
@@ -9,8 +12,8 @@
 #   - A .env file (or environment variables) with the required secrets
 #
 # Usage:
-#   ./install-argocd.sh                         # reads secrets from .env file
-#   ./install-argocd.sh --env-file /path/.env   # custom .env path
+#   ./bootstrap.sh                         # reads secrets from .env file
+#   ./bootstrap.sh --env-file /path/.env   # custom .env path
 
 set -euo pipefail
 

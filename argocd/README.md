@@ -1,80 +1,60 @@
-# ArgoCD Setup for Reddit Clone Application
+# ArgoCD Configuration
 
-This directory contains ArgoCD Application manifests for automated GitOps deployment.
+ArgoCD Application manifests and platform lifecycle scripts for the Reddit Clone.
 
-## Prerequisites
-
-1. ArgoCD installed on your Kubernetes cluster (automatically installed via Terraform from the Infrastructure Repository)
-2. ArgoCD CLI configured (optional)
-3. Access to the CD repository
-
-## Installation
-
-### ArgoCD Installation (Automated via Terraform)
-
-**ArgoCD is now automatically installed** when you run `terraform apply` in the [Infrastructure Repository](https://github.com/mohamedmostafa33/nti-final-project-infra). The Terraform ArgoCD module will:
-- Create the `argocd` namespace
-- Install ArgoCD using the official Helm chart (version 7.7.16)
-- Configure the ArgoCD server as a LoadBalancer service
-- Set up insecure mode for easier access
-
-### Manual Installation (Alternative)
-
-If you need to install ArgoCD manually (for standalone setups or testing):
-
-```bash
-# Use the installation script
-chmod +x argocd/install/install-argocd.sh
-./argocd/install/install-argocd.sh
-```
-
-### Deploy the Applications
-
-```bash
-# Apply the root application (App of Apps pattern)
-kubectl apply -f argocd/root-app.yaml
-
-# Or apply individual applications
-kubectl apply -f argocd/apps/
-```
-
-### Access ArgoCD UI
-
-```bash
-# If using LoadBalancer (default with Terraform):
-kubectl get svc argocd-server -n argocd
-# Access the EXTERNAL-IP in your browser
-
-# Or port forward to access the UI locally:
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-
-# Get the initial admin password
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-```
-
-## Application Structure
+## Structure
 
 ```
 argocd/
-├── root-app.yaml           # Root application (App of Apps)
+├── root-app.yaml           # App-of-Apps root application
 ├── install/
-│   └── argocd-install.yaml # ArgoCD installation manifest
+│   ├── bootstrap.sh        # Full platform bootstrap (Gateway, cert-manager, ArgoCD, apps)
+│   ├── teardown.sh         # Full platform teardown (run before terraform destroy)
+│   ├── argocd-config.yaml  # ArgoCD ConfigMap and RBAC
+│   └── .env                # Secrets file (gitignored)
 └── apps/
-    ├── gateway.yaml        # Gateway application
-    ├── backend.yaml        # Backend application
-    └── frontend.yaml       # Frontend application
+    ├── gateway.yaml        # sync-wave 0 -- Gateway + TLS
+    ├── backend.yaml        # sync-wave 1 -- Django API
+    ├── frontend.yaml       # sync-wave 2 -- Next.js
+    ├── monitoring.yaml     # sync-wave 3 -- Prometheus + Grafana
+    ├── elasticsearch.yaml  # sync-wave 3 -- Elasticsearch
+    ├── kibana.yaml         # sync-wave 4 -- Kibana (after ES)
+    └── filebeat.yaml       # sync-wave 4 -- Filebeat (after ES)
 ```
 
-## Sync Waves
+## Bootstrap
 
-The applications are deployed in the following order using sync waves:
-1. **Wave 0**: Gateway (must be deployed first)
-2. **Wave 1**: Backend (depends on Gateway)
-3. **Wave 2**: Frontend (depends on Backend)
+```bash
+# Create .env with required secrets, then:
+chmod +x argocd/install/bootstrap.sh
+./argocd/install/bootstrap.sh
+```
 
-## Auto-Sync
+The script installs all prerequisites and deploys the root application. ArgoCD auto-syncs all child apps in sync-wave order.
 
-All applications are configured with auto-sync enabled:
-- **Prune**: Automatically delete resources that are no longer in Git
-- **SelfHeal**: Automatically sync when drift is detected
-- **CreateNamespace**: Automatically create namespaces if they don't exist
+## Teardown
+
+```bash
+chmod +x argocd/install/teardown.sh
+./argocd/install/teardown.sh
+```
+
+Removes all applications, monitoring, ELK, Gateway, cert-manager, ArgoCD, and their namespaces. Run before `terraform destroy`.
+
+## Access ArgoCD UI
+
+```bash
+# Get LoadBalancer URL
+kubectl get svc argocd-server -n argocd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+
+# Get admin password
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```
+
+## Sync Policy
+
+All applications use automated sync with:
+- **Prune** -- removes resources deleted from Git
+- **SelfHeal** -- reverts manual cluster changes
+- **CreateNamespace** -- auto-creates target namespaces
+- **Retry** -- up to 5 retries with exponential backoff
