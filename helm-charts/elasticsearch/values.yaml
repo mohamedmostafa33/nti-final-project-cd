@@ -20,8 +20,3 @@ elasticsearch:
 
   persistence:
     enabled: true
-
-  # Single-node discovery
-  extraEnvs:
-    - name: discovery.type
-      value: single-node
