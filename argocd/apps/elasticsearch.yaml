@@ -1,11 +1,11 @@
-# ArgoCD Application for Logging (ELK Stack)
+# ArgoCD Application for Elasticsearch
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: logging
+  name: elasticsearch
   namespace: argocd
   labels:
-    app.kubernetes.io/name: logging
+    app.kubernetes.io/name: elasticsearch
     app.kubernetes.io/part-of: reddit-clone
   annotations:
     argocd.argoproj.io/sync-wave: "3"
@@ -17,9 +17,9 @@ spec:
   source:
     repoURL: https://github.com/mohamedmostafa33/nti-final-project-cd.git
     targetRevision: main
-    path: helm-charts/logging
+    path: helm-charts/elasticsearch
     helm:
-      releaseName: logging
+      releaseName: elasticsearch
       valueFiles:
         - values.yaml
 

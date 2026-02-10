@@ -1,0 +1,11 @@
+apiVersion: v2
+name: filebeat
+description: Filebeat for Reddit Clone logging
+type: application
+version: 1.0.0
+appVersion: "8.5.1"
+
+dependencies:
+  - name: filebeat
+    version: "8.5.1"
+    repository: "https://helm.elastic.co"

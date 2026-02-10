@@ -1,0 +1,11 @@
+apiVersion: v2
+name: kibana
+description: Kibana for Reddit Clone logging
+type: application
+version: 1.0.0
+appVersion: "8.5.1"
+
+dependencies:
+  - name: kibana
+    version: "8.5.1"
+    repository: "https://helm.elastic.co"
