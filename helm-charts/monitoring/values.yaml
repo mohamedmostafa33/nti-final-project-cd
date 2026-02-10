@@ -1,0 +1,69 @@
+# Monitoring Stack Values
+# Wraps kube-prometheus-stack with project-specific defaults
+
+kube-prometheus-stack:
+  # Grafana
+  grafana:
+    enabled: true
+    adminPassword: "admin"
+    service:
+      type: LoadBalancer
+    persistence:
+      enabled: false
+    defaultDashboardsEnabled: true
+    defaultDashboardsTimezone: utc
+
+  # Prometheus
+  prometheus:
+    prometheusSpec:
+      serviceMonitorSelectorNilUsesHelmValues: false
+      serviceMonitorSelector: {}
+      serviceMonitorNamespaceSelector: {}
+      podMonitorSelectorNilUsesHelmValues: false
+      podMonitorSelector: {}
+      podMonitorNamespaceSelector: {}
+      retention: 10d
+      resources:
+        requests:
+          memory: 512Mi
+          cpu: 250m
+        limits:
+          memory: 2Gi
+          cpu: "1"
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 10Gi
+
+  # Alertmanager
+  alertmanager:
+    enabled: true
+
+  # Node Exporter
+  prometheus-node-exporter:
+    enabled: true
+
+  # Kube State Metrics
+  kube-state-metrics:
+    enabled: true
+
+# -- Reddit Backend ServiceMonitor (deployed alongside the stack)
+backendServiceMonitor:
+  enabled: true
+  name: reddit-backend-monitor
+  namespace: monitoring
+  labels:
+    release: monitoring
+  endpoints:
+    - interval: 15s
+      path: /metrics
+      port: http
+  namespaceSelector:
+    matchNames:
+      - reddit-app
+  selector:
+    matchLabels:
+      app: reddit-backend

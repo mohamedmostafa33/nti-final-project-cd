@@ -1,0 +1,11 @@
+apiVersion: v2
+name: monitoring
+description: Kube Prometheus Stack monitoring for Reddit Clone
+type: application
+version: 1.0.0
+appVersion: "0.88.1"
+
+dependencies:
+  - name: kube-prometheus-stack
+    version: "81.5.2"
+    repository: "https://prometheus-community.github.io/helm-charts"
