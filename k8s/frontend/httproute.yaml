@@ -1,0 +1,25 @@
+# Routes all non-backend traffic ("/") to the frontend service.
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: reddit-frontend-route
+  namespace: reddit-gateway
+spec:
+  parentRefs:
+    - name: reddit-gateway
+      sectionName: https
+
+  hostnames:
+    - www.abdallahfekry.com
+
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        # Cross-namespace reference → allowed by ReferenceGrant
+        - name: reddit-frontend-service
+          namespace: reddit-front
+          port: 80

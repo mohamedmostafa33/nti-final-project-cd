@@ -1,13 +1,22 @@
+# from helm-chart/backend/templates/configmap.yaml
+# ConfigMap for backend application settings.
+# This includes environment variables for Django settings and AWS S3 configuration.
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: reddit-app-config
-  namespace: reddit-app-namespace
+  namespace: reddit-back
 data:
   USE_S3: "true"
   DJANGO_DEBUG: "False"
-  DJANGO_ALLOWED_HOSTS: "*"
-  DJANGO_CSRF_TRUSTED_ORIGINS: ""
-  DJANGO_SECURE: "true"
+  # Include localhost for k8s health checks (kubelet uses pod IP with localhost
+  # as fallback)
+  DJANGO_ALLOWED_HOSTS: "www.abdallahfekry.com,abdallahfekry.com,localhost,127.0.0.1"
+  DJANGO_CORS_ALLOWED_ORIGINS: "https://www.abdallahfekry.com,https://abdallahfekry.com"
+  DJANGO_CSRF_TRUSTED_ORIGINS: "https://www.abdallahfekry.com,https://abdallahfekry.com"
+  DJANGO_SECURE: "false" # TLS terminates at gateway, internal traffic is HTTP
   DJANGO_EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
-  
+  DJANGO_HSTS_SECONDS: "31536000"
+  AWS_BUCKET_NAME: "reddit-clone-bucket-nti"
+  AWS_S3_REGION_NAME: "us-east-1"
+  AWS_S3_CUSTOM_DOMAIN: "reddit-clone-bucket-nti.s3.amazonaws.com"

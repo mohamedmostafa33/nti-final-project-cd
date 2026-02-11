@@ -1,0 +1,21 @@
+# This file creates isolated namespaces for each layer of the system.
+# Separation helps with security, ownership, and future CI/CD.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: reddit-front
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: reddit-back
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: reddit-gateway
+  # labels:
+  #   access-to-gateway: "true"
+---
+

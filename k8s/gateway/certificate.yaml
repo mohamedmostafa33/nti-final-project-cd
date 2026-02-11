@@ -1,0 +1,18 @@
+# This Certificate resource asks cert-manager to generate a TLS certificate
+# for the domain using Let's Encrypt.
+# The resulting certificate is stored as a Secret and later consumed by the Gateway.
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: reddit-tls-cert
+  namespace: reddit-gateway
+spec:
+  secretName: reddit-tls-cert ### This Secret is referenced by the Gateway to terminate TLS
+  issuerRef:
+    name: letsencrypt-prod # Must exist BEFORE applying this file
+    kind: ClusterIssuer # Using ClusterIssuer for cluster-wide scope & use any namespace
+  dnsNames:
+    - www.abdallahfekry.com
+---
+

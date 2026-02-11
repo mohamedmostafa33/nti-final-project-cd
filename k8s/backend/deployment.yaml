@@ -1,33 +1,73 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: reddit-backend
-  labels:
-    app: reddit-backend
+  name: reddit-back
+  namespace: reddit-back
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+
   selector:
     matchLabels:
-      app: reddit-backend
+      app: reddit-back
+
   template:
     metadata:
       labels:
-        app: reddit-backend
+        app: reddit-back
+
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
+
       containers:
-        - name: reddit-backend
-          image: mohamedmostafa33/backend:latest
+        - name: backend
+          image: 201937184629.dkr.ecr.us-east-1.amazonaws.com/reddit-backend:e7335ad
+          imagePullPolicy: IfNotPresent
+
           ports:
-            - containerPort: 8000
-          env:
-            - name: DATABASE_URL
-              value: "postgresql://user:password@postgres:5432/reddit"
-            - name: PORT
-              value: "8000"
+            - name: http
+              containerPort: 8000
+
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "200m"
+              cpu: 250m
+              memory: 256Mi
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              cpu: 500m
+              memory: 512Mi
+
+          envFrom:
+            - configMapRef:
+                name: reddit-app-config
+            - secretRef:
+                name: reddit-app-secret
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          livenessProbe:
+            httpGet:
+              path: /health/
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health/
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3

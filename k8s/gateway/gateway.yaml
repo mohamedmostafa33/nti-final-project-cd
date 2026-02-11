@@ -1,14 +1,48 @@
+# The Gateway is the single entry point into the cluster.
+# It listens on ports 80 and 443 and terminates TLS.
+
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: reddit-gateway
-  namespace: default
+  namespace: reddit-gateway
 spec:
   gatewayClassName: nginx
+
   listeners:
+    # HTTP listener exists ONLY to redirect traffic to HTTPS
     - name: http
       protocol: HTTP
       port: 80
       allowedRoutes:
         namespaces:
           from: All
+
+        #   allowedRoutes:
+        # namespaces:
+        #   from: Selector
+        #   selector:
+        #     matchLabels:
+        #       access-to-gateway: "true"
+
+    # HTTPS listener handles real application traffic
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: www.abdallahfekry.com
+      tls:
+        mode: Terminate
+        # This Secret is created by cert-manager (see certificate.yaml)
+        certificateRefs:
+          - name: reddit-tls-cert ### This Secret is referenced by the Gateway to terminate TLS
+            kind: Secret
+      allowedRoutes:
+        namespaces:
+          from: All
+
+        #   allowedRoutes:
+        # namespaces:
+        #   from: Selector
+        #   selector:
+        #     matchLabels:
+        #       access-to-gateway: "true"
