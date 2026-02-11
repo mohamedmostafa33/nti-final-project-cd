@@ -1,12 +1,15 @@
+# Internal backend service.
+# Receives traffic ONLY from the Gateway via HTTPRoutes.
+
 apiVersion: v1
 kind: Service
 metadata:
   name: reddit-backend-service
+  namespace: reddit-back
 spec:
-  selector:
-    app: reddit-backend
-  ports:
-    - protocol: TCP
-      port: 8000
-      targetPort: 8000
   type: ClusterIP
+  selector:
+    app: reddit-back
+  ports:
+    - port: 8000
+      targetPort: 8000

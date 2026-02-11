@@ -1,31 +1,30 @@
+# Runs the frontend application pods.
+# Image: zain-front
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: reddit-frontend
-  labels:
-    app: reddit-frontend
+  name: zain-front
+  namespace: reddit-front
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: reddit-frontend
+      app: reddit-front
   template:
     metadata:
       labels:
-        app: reddit-frontend
+        app: reddit-front
     spec:
       containers:
-        - name: reddit-frontend
-          image: mohamedmostafa33/reddit-frontend:latest
+        - name: frontend
+          image: "201937184629.dkr.ecr.us-east-1.amazonaws.com/reddit-frontend:e7335ad"
           ports:
-            - containerPort: 3000
-          env:
-            - name: REACT_APP_BACKEND_URL
-              value: "http://reddit-backend-service:8000"
+            - containerPort: 80
           resources:
-            requests:
-              memory: "128Mi"
-              cpu: "100m"
             limits:
-              memory: "256Mi"
-              cpu: "200m"
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 250m
+              memory: 64Mi

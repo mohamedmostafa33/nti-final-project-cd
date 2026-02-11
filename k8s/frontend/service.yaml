@@ -1,12 +1,15 @@
+# Internal ClusterIP service for the frontend.
+# This service is referenced by an HTTPRoute in the gateway namespace.
+
 apiVersion: v1
 kind: Service
 metadata:
   name: reddit-frontend-service
+  namespace: reddit-front
 spec:
-  selector:
-    app: reddit-frontend
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 3000
   type: ClusterIP
+  selector:
+    app: reddit-front
+  ports:
+    - port: 80
+      targetPort: 80

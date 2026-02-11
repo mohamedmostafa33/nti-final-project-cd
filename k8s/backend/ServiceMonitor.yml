@@ -1,0 +1,17 @@
+# This file defines a ServiceMonitor for the reddit-back service, which is used by Prometheus to scrape metrics from the backend application. The ServiceMonitor specifies the target service, the namespace it resides in, and the endpoint configuration for scraping metrics.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: reddit-back-monitor
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: reddit-back
+  namespaceSelector:
+    matchNames:
+      - reddit-back
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

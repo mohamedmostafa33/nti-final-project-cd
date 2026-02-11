@@ -1,0 +1,32 @@
+# ReferenceGrant is REQUIRED because:
+# HTTPRoutes live in reddit-gateway
+# Services live in reddit-front and reddit-back
+# Kubernetes blocks this by default for security.
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: ReferenceGrant
+metadata:
+  name: allow-gateway-to-frontend
+  namespace: reddit-front
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: reddit-gateway
+  to:
+    - group: ""
+      kind: Service
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: ReferenceGrant
+metadata:
+  name: allow-gateway-to-backend
+  namespace: reddit-back
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: reddit-gateway
+  to:
+    - group: ""
+      kind: Service

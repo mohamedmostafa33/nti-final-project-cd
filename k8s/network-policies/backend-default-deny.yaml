@@ -1,0 +1,9 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-backend
+  namespace: reddit-back
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress

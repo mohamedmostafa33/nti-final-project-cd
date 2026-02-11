@@ -1,0 +1,224 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "b4bedb3f-8035-4231-b70c-f5f6d531e7f5",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -864,
+        -32
+      ],
+      "id": "c0479bb6-dc0c-4cf5-9764-85f3da221e38",
+      "name": "Webhook",
+      "webhookId": "b4bedb3f-8035-4231-b70c-f5f6d531e7f5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8f12862c-58de-4113-b5e3-8b77e0dbb5ba",
+              "leftValue": "={{ !!$json.body.status }}\n",
+              "rightValue": "success",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -400,
+        192
+      ],
+      "id": "438b72f2-59b2-4ef8-a6ae-4080c3524fa6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hooks.slack.com/services/<YOUR_SLACK_WEBHOOK>",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Content-Type\": \"application/json\"\n}\n",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"text\": \"🚀 *Deploy SUCCESS*\\n\\n📦 Repo: {{$json.body.repo}}\\n👤 Actor: {{$json.body.actor}}\\n🌍 Env: {{$json.body.env}}\\n🔑 Commit: {{$json.body.commit}}\\n🔗 Run: https://github.com/{{$json.body.repo}}/actions/runs/{{$json.body.run_id}}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        -48
+      ],
+      "id": "c884bf1d-ae8c-4fb6-a47e-06829ed12863",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hooks.slack.com/services/<YOUR_SLACK_WEBHOOK>",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Content-Type\": \"application/json\"\n}\n",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"text\": \"❌ *Deploy FAILED*\\n\\n📦 Repo: {{$json.body.repo}}\\n👤 Actor: {{$json.body.actor}}\\n🌍 Env: {{$json.body.env}}\\n🔑 Commit: {{$json.body.commit}}\\n\\n🚨 Check GitHub Actions logs\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        464,
+        512
+      ],
+      "id": "83680d0e-536d-4623-9c39-4623186d42ed",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "chatId": "911005950",
+        "text": "=🚀 Deploy SUCCESS\n\n📦 Repo: {{$json.body.repo}}\n👤 Actor: {{$json.body.actor}}\n🌍 Env: {{$json.body.env}}\n🔑 Commit: {{$json.body.commit}}\n🔗 Run: https://github.com/{{$json.body.repo}}/actions/runs/{{$json.body.run_id}}\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        128
+      ],
+      "id": "cb18dff8-15b0-4494-9cb5-6adc1a72c908",
+      "name": "Send a text message",
+      "webhookId": "a9a129a5-7501-49ec-b4ab-e44cb76a5af3",
+      "credentials": {
+        "telegramApi": {
+          "id": "022wSNBWrfQrJNBx",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "911005950",
+        "text": "=🚀 Deploy false\n\n📦 Repo: {{$json.body.repo}}\n👤 Actor: {{$json.body.actor}}\n🌍 Env: {{$json.body.env}}\n🔑 Commit: {{$json.body.commit}}\n🔗 Run: https://github.com/{{$json.body.repo}}/actions/runs/{{$json.body.run_id}}\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        320
+      ],
+      "id": "9493e3db-d463-4a51-b778-c7fb331f5247",
+      "name": "Send a text message1",
+      "webhookId": "a9a129a5-7501-49ec-b4ab-e44cb76a5af3",
+      "credentials": {
+        "telegramApi": {
+          "id": "022wSNBWrfQrJNBx",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "e281084c-6a1a-4d19-adbc-9d75f5c05c56",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1408,
+        -416
+      ],
+      "id": "8f31d4a7-ee10-4921-8f3d-70b4523c0d6b",
+      "name": "Webhook1",
+      "webhookId": "e281084c-6a1a-4d19-adbc-9d75f5c05c56"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "2c4c476c-15b3-44da-a7ca-7281943a3332",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cea569b7190bf54abd89daed4273f2a42c94406e45dfa587af1e1b77b8846133"
+  },
+  "id": "sn7x2Lt4ww-gvnY7oao_O",
+  "tags": []
+}
