@@ -6,6 +6,12 @@ kibana:
   elasticsearchCertificateSecret: elasticsearch-master-certs
   elasticsearchCertificateAuthoritiesFile: ca.crt
 
+  # Kibana configuration
+  kibanaConfig:
+    kibana.yml: |
+      server.name: kibana
+      monitoring.ui.container.elasticsearch.enabled: true
+
   resources:
     requests:
       cpu: 250m
