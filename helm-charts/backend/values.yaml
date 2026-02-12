@@ -8,7 +8,7 @@ deployment:
   name: reddit-backend
   app: reddit-backend
   replicas: 1
-  image: "201937184629.dkr.ecr.us-east-1.amazonaws.com/reddit-backend:e260982" # Will be set by CI/CD pipeline: <account>.dkr.ecr.us-east-1.amazonaws.com/backend-app:tag
+  image: "201937184629.dkr.ecr.us-east-1.amazonaws.com/reddit-backend:e61bca4" # Will be set by CI/CD pipeline: <account>.dkr.ecr.us-east-1.amazonaws.com/backend-app:tag
   containerPort: 8000
   imagePullPolicy: Always
   resources:
