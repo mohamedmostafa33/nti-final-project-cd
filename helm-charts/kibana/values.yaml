@@ -2,6 +2,10 @@
 kibana:
   elasticsearchHosts: "https://elasticsearch-master:9200"
 
+  # Trust Elasticsearch CA certificate
+  elasticsearchCertificateSecret: elasticsearch-master-certs
+  elasticsearchCertificateAuthoritiesFile: ca.crt
+
   resources:
     requests:
       cpu: 250m
