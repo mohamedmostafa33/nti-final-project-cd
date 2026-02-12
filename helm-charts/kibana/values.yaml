@@ -11,6 +11,7 @@ kibana:
     kibana.yml: |
       server.name: kibana
       monitoring.ui.container.elasticsearch.enabled: true
+      elasticsearch.ssl.certificateAuthorities: /usr/share/kibana/config/certs/ca.crt
 
   resources:
     requests:
