@@ -1,8 +1,8 @@
 # Filebeat values for Reddit Clone logging
 filebeat:
+  podAnnotations:
+    rollout.restart/trigger: "2026-02-12-fix-es-password"
   daemonset:
-    podAnnotations:
-      rollout.restart/trigger: "2026-02-12-fix-es-password"
     filebeatConfig:
       filebeat.yml: |
         filebeat.inputs:
