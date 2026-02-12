@@ -8,7 +8,7 @@ deployment:
   name: reddit-frontend
   app: reddit-frontend
   replicas: 1
-  image: "201937184629.dkr.ecr.us-east-1.amazonaws.com/reddit-frontend:389e6ba" # Will be set by CI/CD pipeline: <account>.dkr.ecr.us-east-1.amazonaws.com/reddit-frontend:tag
+  image: "201937184629.dkr.ecr.us-east-1.amazonaws.com/reddit-frontend:8caed4e" # Will be set by CI/CD pipeline: <account>.dkr.ecr.us-east-1.amazonaws.com/reddit-frontend:tag
   containerPort: 3000
   imagePullPolicy: Always
   resources:
