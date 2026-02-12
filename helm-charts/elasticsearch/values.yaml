@@ -6,6 +6,11 @@ elasticsearch:
   # Single-node cluster will never reach green, use yellow
   clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 
+  # Fix elastic password to prevent random regeneration on each sync
+  secret:
+    enabled: true
+    password: "UTg6kzxeaoV303Gc"
+
   esJavaOpts: "-Xmx1g -Xms1g"
 
   resources:
