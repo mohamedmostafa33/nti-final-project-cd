@@ -3,6 +3,9 @@ elasticsearch:
   replicas: 1
   minimumMasterNodes: 1
 
+  # Single-node cluster will never reach green, use yellow
+  clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
+
   esJavaOpts: "-Xmx1g -Xms1g"
 
   resources:
